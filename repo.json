@@ -4,10 +4,12 @@
     "Name": "SkipCutscene",
     "Punchline": "Help you skip cutscene from Duty Roulette: Main Scenario.",
     "Description": "A plugin which could help you skip cutscene from Duty Roulette: Main Scenario.",
-    "Tags": ["utility"],
+    "Tags": [
+      "utility"
+    ],
     "InternalName": "SkipCutscene",
-    "AssemblyVersion": "1.2.3.1",
-    "TestingAssemblyVersion": "1.2.3.1",
+    "AssemblyVersion": "1.2.3.2",
+    "TestingAssemblyVersion": "1.2.3.2",
     "RepoUrl": "https://github.com/lunya-miaou/Dalamud.SkipCutscene",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 14,
@@ -15,8 +17,8 @@
     "IsTestingExclusive": "False",
     "DownloadCount": 1,
     "LastUpdate": 1640036270,
-    "DownloadLinkTesting": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.1/latest.zip",
-    "DownloadLinkInstall": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.1/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.1/latest.zip"
+    "DownloadLinkTesting": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.2/latest.zip",
+    "DownloadLinkInstall": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.2/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/lunya-miaou/Dalamud.SkipCutscene/releases/download/1.2.3.2/latest.zip"
   }
 ]
