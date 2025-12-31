@@ -40,7 +40,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: .\SkipCutscene\bin\Release\SkipCutscene\latest.zip
+          files: SkipCutscene/bin/Release/SkipCutscene/latest.zip
 
       - name: Write out repo.json
         run: |
