@@ -1,27 +1,17 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags-ignore:
+      - testing_*
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
     runs-on: windows-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -36,46 +26,43 @@ jobs:
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
       - name: Build
-        run: dotnet build --configuration Release
+        run: |
+          $ver = '${{ github.ref_name }}'
+          Invoke-Expression 'dotnet build --configuration Release -p:Version=$ver -p:FileVersion=$ver -p:AssemblyVersion=$ver'
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: SkipCutscene
           path: .\SkipCutscene\bin\Release\SkipCutscene\latest.zip
 
-      - name: Checkout dist
-        uses: actions/checkout@v6
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          ref: dist
-          path: dist
+          files: .\SkipCutscene\bin\Release\SkipCutscene\latest.zip
 
-      - name: Upload dist
-        continue-on-error: false
+      - name: Write out repo.json
         run: |
-          cd "$Env:GITHUB_WORKSPACE"
-          $content = Get-Content ".\dist\repo.json"
-          $repo = $content | ConvertFrom-Json
-          $version = '"AssemblyVersion": "9.9.9.9"'
-          $plugin = Get-Content ".\SkipCutscene\bin\Release\SkipCutscene\SkipCutscene.json" | ConvertFrom-Json
-          $old_version = $version -replace '9.9.9.9',$repo.AssemblyVersion
-          $new_version = $version -replace '9.9.9.9',$plugin.AssemblyVersion
-          $content = $content -replace $old_version,$new_version
-          $api_level = '"DalamudApiLevel": 9999'
-          $old_api_level = $api_level -replace '9999',$repo.DalamudApiLevel
-          $new_api_level = $api_level -replace '9999',$plugin.DalamudApiLevel
-          $content = $content -replace $old_api_level,$new_api_level
-          Set-Content -Path ".\dist\repo.json" -Value $content
-          Copy-Item -Path .\SkipCutscene\bin\Release\SkipCutscene\latest.zip -Destination .\dist\ -Force
-          cd dist
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Regenerate PluginMaster"
-      - name: Push dist
-        continue-on-error: false
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: dist
-          directory: dist
+          $ver = '${{ github.ref_name }}'
+          $path = './repo.json'
+          $json = Get-Content -Raw $path | ConvertFrom-Json
+          $json[0].AssemblyVersion = $ver
+          $json[0].TestingAssemblyVersion = $ver
+          $json[0].DownloadLinkInstall = $json.DownloadLinkInstall -replace '[^/]+/latest.zip',"$ver/latest.zip"
+          $json[0].DownloadLinkTesting = $json.DownloadLinkTesting -replace '[^/]+/latest.zip',"$ver/latest.zip"
+          $json[0].DownloadLinkUpdate = $json.DownloadLinkUpdate -replace '[^/]+/latest.zip',"$ver/latest.zip"
+          $content = $json | ConvertTo-Json -AsArray
+          set-content -Path $path -Value $content
+
+      - name: Commit repo.json
+        run: |
+          git config --global user.name "Actions User"
+          git config --global user.email "actions@github.com"
+          git fetch origin main
+          git branch -f main ${{ github.sha }}
+          git checkout main
+          git add repo.json
+          git commit -m "[CI] Updating repo.json for ${{ github.ref_name }}" || true
+          git push origin main
+
